@@ -420,6 +420,7 @@
             var contract = [];
             var hashes = [];
             var fraud_occurred = false;
+            var victory_achieved = false;
             var alice = {
                 privkey: "ab".repeat( 32 ),
                 scripts: [],
@@ -596,6 +597,145 @@
                     actual[ 1 ],
                     "OP_EQUALVERIFY",
                     self[ "pubkey" ],
+                    "OP_CHECKSIG"
+                ];
+                var target = tapscript.Tap.encodeScript( script );
+                return [ target, script ];
+            }
+            var proveVictory = ( p1, p2, p3, opponent, self ) => {
+                var h1 = rmd160( hexToBytes( p1 ) );
+                var h2 = rmd160( hexToBytes( p2 ) );
+                var h3 = rmd160( hexToBytes( p3 ) );
+                var actual;
+                var combinations = [];
+                var i; for ( i=0; i<9; i++ ) {
+                    //row 1
+                    if ( i == 0 ) var hashes = [0, 9, 18, 27, 1, 10, 19, 28];
+                    if ( i == 1 ) var hashes = [0, 9, 18, 27, 2, 11, 20, 29];
+                    if ( i == 2 ) var hashes = [1, 10, 19, 28, 2, 11, 20, 29];
+                    //row 2
+                    if ( i == 3 ) var hashes = [3, 12, 21, 30, 4, 13, 22, 31];
+                    if ( i == 4 ) var hashes = [3, 12, 21, 30, 5, 14, 23, 32];
+                    if ( i == 5 ) var hashes = [4, 13, 22, 31, 5, 14, 23, 32];
+                    //row 3
+                    if ( i == 6 ) var hashes = [6, 15, 24, 33, 7, 16, 25, 34];
+                    if ( i == 7 ) var hashes = [6, 15, 24, 33, 8, 17, 26, 35];
+                    if ( i == 8 ) var hashes = [7, 16, 25, 34, 8, 17, 26, 35];
+                    for ( var comb of G.combination( hashes, 2 ) ) {var comb2 = JSON.parse( JSON.stringify( comb ) ); comb2.sort((a,b)=>a-b).reverse(); if ( ( comb2[ 0 ] - comb2[ 1 ] ) % 9 && comb2[ 0 ] - comb2[ 1 ] >= 3 ) combinations.push( Array.from( comb ) );}
+                }
+                combinations.forEach( ( item, index ) => {
+                    combinations.splice( index * 5, 1, ...JSON.parse( JSON.stringify( [combinations[ index * 5 ]].flatMap(i => Array(5).fill(i))) ) );
+                });
+                combinations.forEach( ( item, index ) => {
+                    if ( item.length > 2 ) return;
+                    //row 1
+                    if ( index < 180 ) {
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 1 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 1 ) {
+                            if ( index % 5 == 0 ) item.push( 2 );
+                            if ( index % 5 == 1 ) item.push( 11 );
+                            if ( index % 5 == 2 ) item.push( 20 );
+                            if ( index % 5 == 3 ) item.push( 29 );
+                            if ( index % 5 == 4 ) item.push( 38 );
+                        }
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 1 );
+                            if ( index % 5 == 1 ) item.push( 10 );
+                            if ( index % 5 == 2 ) item.push( 19 );
+                            if ( index % 5 == 3 ) item.push( 28 );
+                            if ( index % 5 == 4 ) item.push( 37 );
+                        }
+                        if ( item[ 0 ] % 3 == 1 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 1 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 0 );
+                            if ( index % 5 == 1 ) item.push( 9 );
+                            if ( index % 5 == 2 ) item.push( 18 );
+                            if ( index % 5 == 3 ) item.push( 27 );
+                            if ( index % 5 == 4 ) item.push( 36 );
+                        }
+                    }
+                    //row 2
+                    if ( index >= 180 && index < 360 ) {
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 1 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 1 ) {
+                            if ( index % 5 == 0 ) item.push( 5 );
+                            if ( index % 5 == 1 ) item.push( 14 );
+                            if ( index % 5 == 2 ) item.push( 23 );
+                            if ( index % 5 == 3 ) item.push( 32 );
+                            if ( index % 5 == 4 ) item.push( 41 );
+                        }
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 4 );
+                            if ( index % 5 == 1 ) item.push( 13 );
+                            if ( index % 5 == 2 ) item.push( 22 );
+                            if ( index % 5 == 3 ) item.push( 31 );
+                            if ( index % 5 == 4 ) item.push( 40 );
+                        }
+                        if ( item[ 0 ] % 3 == 1 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 1 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 3 );
+                            if ( index % 5 == 1 ) item.push( 12 );
+                            if ( index % 5 == 2 ) item.push( 21 );
+                            if ( index % 5 == 3 ) item.push( 30 );
+                            if ( index % 5 == 4 ) item.push( 39 );
+                        }
+                    }
+                    //row 3
+                    if ( index >= 360 && index < 540 ) {
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 1 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 1 ) {
+                            if ( index % 5 == 0 ) item.push( 8 );
+                            if ( index % 5 == 1 ) item.push( 17 );
+                            if ( index % 5 == 2 ) item.push( 26 );
+                            if ( index % 5 == 3 ) item.push( 35 );
+                            if ( index % 5 == 4 ) item.push( 44 );
+                        }
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 7 );
+                            if ( index % 5 == 1 ) item.push( 16 );
+                            if ( index % 5 == 2 ) item.push( 25 );
+                            if ( index % 5 == 3 ) item.push( 34 );
+                            if ( index % 5 == 4 ) item.push( 43 );
+                        }
+                        if ( item[ 0 ] % 3 == 1 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 1 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 6 );
+                            if ( index % 5 == 1 ) item.push( 15 );
+                            if ( index % 5 == 2 ) item.push( 24 );
+                            if ( index % 5 == 3 ) item.push( 33 );
+                            if ( index % 5 == 4 ) item.push( 42 );
+                        }
+                    }
+                });
+                combinations.forEach( ( item, index ) => {
+                    combinations[ index ][ 0 ] = bob[ "accept_hashes" ][ item[ 0 ] ];
+                    combinations[ index ][ 1 ] = bob[ "accept_hashes" ][ item[ 1 ] ];
+                    combinations[ index ][ 2 ] = alice[ "hashes" ][ item[ 2 ] ];
+                });
+                var possibles = [];
+                combinations.forEach( item => {
+                    if ( item.includes( h1 ) && item.includes( h2 ) ) possibles.push( item );
+                });
+                possibles.forEach( item => {
+                    if ( item.includes( h3 ) ) actual = item;
+                });
+                if ( !actual ) return;
+                actual.reverse();
+                victory_achieved = true;
+                var script = [
+                    "OP_RIPEMD160",
+                    "OP_SWAP",
+                    "OP_RIPEMD160",
+                    2,
+                    "OP_ROLL",
+                    "OP_RIPEMD160",
+                    "OP_SWAP",
+                    2,
+                    "OP_ROLL",
+                    actual[ 0 ],
+                    "OP_EQUALVERIFY",
+                    actual[ 1 ],
+                    "OP_EQUALVERIFY",
+                    actual[ 2 ],
+                    "OP_EQUALVERIFY",
+                    //todo: ensure this is a multisig path that
+                    //sends the money to an address where Bob
+                    //has an opportunity to prove alice cheated
+                    alice[ "pubkey" ],
                     "OP_CHECKSIG"
                 ];
                 var target = tapscript.Tap.encodeScript( script );
@@ -805,6 +945,177 @@
                         "OP_EQUALVERIFY",
                         reveal_hashes[ ( index % 9 ) + 9 + 9 + 9 ],
                         "OP_EQUALVERIFY",
+                        alice[ "pubkey" ],
+                        "OP_CHECKSIG"
+                    ]);
+                });
+
+                //allow Alice to claim victory if she reveals two acks and a preimage of
+                //her own for any row
+
+                //Bob's ack_hashes for square 1 are 0, 0+9, 0+9+9, and 0+9+9+9
+                //For square 2 they are 1, 1+9, 1+9+9, and 1+9+9+9. For square
+                //3 they are 2, 2+9, 2+9+9, and 2+9+9+9. Alice needs any pair
+                //of those where they have a different "base" (0, 1, or 2) plus
+                //she needs to reveal the "remaining" square in the row.
+                //So, in terms of the "ack" preimages, she needs one of these
+                //combinations:
+                //0, 1+9 | 0, 1+9+9 | 0, 1+9+9+9
+                //0+9, 1 | 0+9, 1+9+9 | 0+9, 1+9+9+9
+                //0+9+9, 1 | 0+9+9, 1+9 | 0+9+9, 1+9+9+9
+                //0+9+9+9, 1 | 0+9+9+9, 1+9 | 0+9+9+9, 1+9+9
+                //0, 2+9 | 0, 2+9+9 | 0, 2+9+9+9
+                //0+9, 2 | 0+9, 2+9+9 | 0+9, 2+9+9+9
+                //0+9+9, 2 | 0+9+9, 2+9 | 0+9+9, 2+9+9+9
+                //0+9+9+9, 2 | 0+9+9+9, 2+9 | 0+9+9+9, 2+9+9
+                //1, 2+9 | 1, 2+9+9 | 1, 2+9+9+9
+                //1+9, 2 | 1+9, 2+9+9 | 1+9, 2+9+9+9
+                //1+9+9, 2 | 1+9+9, 2+9 | 1+9+9, 2+9+9+9
+                //1+9+9+9, 2 | 1+9+9+9, 2+9 | 1+9+9+9, 2+9+9
+                //Every 4 lines above contain every pair from these sets:
+                //0, 9, 18, 27, 1, 10, 19, 28 <-- all 4 square 1s and all 4 square 2s
+                //0, 9, 18, 27, 2, 11, 20, 29 <-- all 4 square 1s and all 4 square 3s
+                //1, 10, 19, 28, 2, 11, 20, 29 <-- all 4 square 2s and all 4 square 3s
+                //but only the ones from different sets (i.e. 0 and 1 should not
+                //be together because they are in the same set)
+                // var combinations = [];
+                // var hashes = [0, 9, 18, 27, 1, 10, 19, 28];
+                // for ( var comb of G.combination( hashes, 2 ) ) {var comb2 = JSON.parse( JSON.stringify( comb ) ); comb2.sort((a,b)=>a-b).reverse(); console.log( comb2, !!( ( comb2[ 0 ] - comb2[ 1 ] ) % 3 ), comb2[ 0 ] - comb2[ 1 ] >= 8 ); if ( ( comb2[ 0 ] - comb2[ 1 ] ) % 9 && comb2[ 0 ] - comb2[ 1 ] >= 3 ) combinations.push( Array.from( comb ) );}
+                // console.log( combinations );
+                //Running the above code 3 times with the different sets should get me every
+                //combination of 2 "X"s that can win the row. Each duo *also* needs the third square
+                //-- for the first example ( 0, 10 ) I can figure out which one is needed by taking
+                //the two numbers mod 3 and seeing what is missing. 0 % 3 = 0 and 10 % 3 = 1, so I am
+                //missing 2. There are five different 2s I can supply as the missing 2 so I need to
+                //multiply my copy of ( 0, 10 ) by 5 and fill each one in with one of the following
+                //numbers: 2, 11, 20, 29, 38
+                //the code below should get me every possible "winning" combination of the row
+                //-- and apparently there are 180 ways to win in any row. I should be able to
+                //repeat this procedure for each row and diagonal to get most of the ways to
+                //win, and for winning by columns, it is mostly the same procedure, except
+                //the `var hashes=` parts will be different, and the parts that say
+                //`item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 1` will require the squares to both
+                //have 0s in them or 1s in them or 2s in them, and the parts that say
+                //`item.push( 0 );` will each have a different last number
+
+                var combinations = [];
+                var i; for ( i=0; i<9; i++ ) {
+                    //row 1
+                    if ( i == 0 ) var hashes = [0, 9, 18, 27, 1, 10, 19, 28];
+                    if ( i == 1 ) var hashes = [0, 9, 18, 27, 2, 11, 20, 29];
+                    if ( i == 2 ) var hashes = [1, 10, 19, 28, 2, 11, 20, 29];
+                    //row 2
+                    if ( i == 3 ) var hashes = [3, 12, 21, 30, 4, 13, 22, 31];
+                    if ( i == 4 ) var hashes = [3, 12, 21, 30, 5, 14, 23, 32];
+                    if ( i == 5 ) var hashes = [4, 13, 22, 31, 5, 14, 23, 32];
+                    //row 3
+                    if ( i == 6 ) var hashes = [6, 15, 24, 33, 7, 16, 25, 34];
+                    if ( i == 7 ) var hashes = [6, 15, 24, 33, 8, 17, 26, 35];
+                    if ( i == 8 ) var hashes = [7, 16, 25, 34, 8, 17, 26, 35];
+                    for ( var comb of G.combination( hashes, 2 ) ) {var comb2 = JSON.parse( JSON.stringify( comb ) ); comb2.sort((a,b)=>a-b).reverse(); if ( ( comb2[ 0 ] - comb2[ 1 ] ) % 9 && comb2[ 0 ] - comb2[ 1 ] >= 3 ) combinations.push( Array.from( comb ) );}
+                }
+                combinations.forEach( ( item, index ) => {
+                    combinations.splice( index * 5, 1, ...JSON.parse( JSON.stringify( [combinations[ index * 5 ]].flatMap(i => Array(5).fill(i))) ) );
+                });
+                combinations.forEach( ( item, index ) => {
+                    if ( item.length > 2 ) return;
+                    //row 1
+                    if ( index < 180 ) {
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 1 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 1 ) {
+                            if ( index % 5 == 0 ) item.push( 2 );
+                            if ( index % 5 == 1 ) item.push( 11 );
+                            if ( index % 5 == 2 ) item.push( 20 );
+                            if ( index % 5 == 3 ) item.push( 29 );
+                            if ( index % 5 == 4 ) item.push( 38 );
+                        }
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 1 );
+                            if ( index % 5 == 1 ) item.push( 10 );
+                            if ( index % 5 == 2 ) item.push( 19 );
+                            if ( index % 5 == 3 ) item.push( 28 );
+                            if ( index % 5 == 4 ) item.push( 37 );
+                        }
+                        if ( item[ 0 ] % 3 == 1 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 1 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 0 );
+                            if ( index % 5 == 1 ) item.push( 9 );
+                            if ( index % 5 == 2 ) item.push( 18 );
+                            if ( index % 5 == 3 ) item.push( 27 );
+                            if ( index % 5 == 4 ) item.push( 36 );
+                        }
+                    }
+                    //row 2
+                    if ( index >= 180 && index < 360 ) {
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 1 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 1 ) {
+                            if ( index % 5 == 0 ) item.push( 5 );
+                            if ( index % 5 == 1 ) item.push( 14 );
+                            if ( index % 5 == 2 ) item.push( 23 );
+                            if ( index % 5 == 3 ) item.push( 32 );
+                            if ( index % 5 == 4 ) item.push( 41 );
+                        }
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 4 );
+                            if ( index % 5 == 1 ) item.push( 13 );
+                            if ( index % 5 == 2 ) item.push( 22 );
+                            if ( index % 5 == 3 ) item.push( 31 );
+                            if ( index % 5 == 4 ) item.push( 40 );
+                        }
+                        if ( item[ 0 ] % 3 == 1 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 1 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 3 );
+                            if ( index % 5 == 1 ) item.push( 12 );
+                            if ( index % 5 == 2 ) item.push( 21 );
+                            if ( index % 5 == 3 ) item.push( 30 );
+                            if ( index % 5 == 4 ) item.push( 39 );
+                        }
+                    }
+                    //row 3
+                    if ( index >= 360 && index < 540 ) {
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 1 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 1 ) {
+                            if ( index % 5 == 0 ) item.push( 8 );
+                            if ( index % 5 == 1 ) item.push( 17 );
+                            if ( index % 5 == 2 ) item.push( 26 );
+                            if ( index % 5 == 3 ) item.push( 35 );
+                            if ( index % 5 == 4 ) item.push( 44 );
+                        }
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 7 );
+                            if ( index % 5 == 1 ) item.push( 16 );
+                            if ( index % 5 == 2 ) item.push( 25 );
+                            if ( index % 5 == 3 ) item.push( 34 );
+                            if ( index % 5 == 4 ) item.push( 43 );
+                        }
+                        if ( item[ 0 ] % 3 == 1 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 1 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 5 == 0 ) item.push( 6 );
+                            if ( index % 5 == 1 ) item.push( 15 );
+                            if ( index % 5 == 2 ) item.push( 24 );
+                            if ( index % 5 == 3 ) item.push( 33 );
+                            if ( index % 5 == 4 ) item.push( 42 );
+                        }
+                    }
+                });
+                combinations.forEach( combination => {
+                    //the witness stack here must have Bob's
+                    //first ack_preimage on the bottom,
+                    //then Bob's second ack_preimage, then
+                    //Alice's last square on top
+                    alices_turn_scripts.push([
+                        "OP_RIPEMD160",
+                        "OP_SWAP",
+                        "OP_RIPEMD160",
+                        2,
+                        "OP_ROLL",
+                        "OP_RIPEMD160",
+                        "OP_SWAP",
+                        2,
+                        "OP_ROLL",
+                        alice[ "hashes" ][ combination[ 2 ] ],
+                        "OP_EQUALVERIFY",
+                        bob[ "accept_hashes" ][ combination[ 1 ] ],
+                        "OP_EQUALVERIFY",
+                        bob[ "accept_hashes" ][ combination[ 0 ] ],
+                        "OP_EQUALVERIFY",
+                        //todo: ensure this is a multisig path that
+                        //sends the money to an address where Bob
+                        //has an opportunity to prove alice cheated
                         alice[ "pubkey" ],
                         "OP_CHECKSIG"
                     ]);
@@ -1261,6 +1572,8 @@
                 game_on = undefined;
                 move = Number( move ) - 1;
                 var move_preimage = alice[ "preimages" ][ Number( move ) + Number( turn * 9 ) ];
+                aliceChecksVictory( step, turn, move_preimage );
+                if ( victory_achieved ) return alert( `You won! Check your console to collect your winnings!` );
                 if ( turn != 0 ) var accept_preimage = alice[ "accept_preimages" ][ bobs_move + Number( ( turn - 1 ) * 9 ) ];
                 else accept_preimage = "";
                 if ( turn == 0 ) var bobs_preimage = "";
@@ -1402,6 +1715,50 @@
                 console.log( cell_3 + cell_4 + cell_5 );
                 console.log( cell_6 + cell_7 + cell_8 );
             }
+            var aliceChecksVictory = ( step, turn, alices_move_preimage ) => {
+                var victory;
+                //check rows
+                var i; for ( i=0; i<3; i++ ) {
+                    if ( i==0 ) var row_nums = [0,1,2];
+                    if ( i==1 ) var row_nums = [3,4,5];
+                    if ( i==2 ) var row_nums = [6,7,8];
+                    for ( var comb of G.combination( row_nums, 2 ) ) {
+                        if ( victory ) continue;
+                        var squares = Array.from( comb );
+                        var bobs_ack_1 = alice[ "bobs_acks" ][ squares[ 0 ] ];
+                        var bobs_ack_2 = alice[ "bobs_acks" ][ squares[ 1 ] ];
+                        if ( !bobs_ack_1 || !bobs_ack_2 ) continue;
+                        victory = proveVictory( bobs_ack_1, bobs_ack_2, alices_move_preimage, bob, alice );
+                    }
+                }
+                if ( victory ) {
+                    var txdata = tapscript.Tx.create({
+                        vin: [{
+                            txid: contract[ step ][ "txid" ],
+                            vout: contract[ step ][ "vout" ],
+                            prevout: {
+                                value: contract[ step ][ "amt" ],
+                                scriptPubKey: tapscript.Address.toScriptPubKey( contract[ step ][ "funding_address" ] )
+                            },
+                        }],
+                        vout: [{
+                            value: contract[ step ][ "amt" ] - 500,
+                            scriptPubKey: tapscript.Address.toScriptPubKey( "tb1qd28npep0s8frcm3y7dxqajkcy2m40eysplyr9v" )
+                        }]
+                    });
+                    var target = victory[ 0 ];
+                    var script = victory[ 1 ];
+                    var sig = tapscript.Signer.taproot.sign( alice[ "privkey" ], txdata, 0, { extension: target });
+                    var pubkey = "ab".repeat( 32 );
+                    var [ tpubkey, cblock ] = tapscript.Tap.getPubKey( pubkey, { tree: alice[ "trees" ][ turn ], target });
+                    txdata.vin[ 0 ].witness = [ sig, bobs_ack_1, bobs_ack_2, alices_move_preimage, script, cblock ];
+                    var txhex = tapscript.Tx.encode( txdata ).hex;
+                    console.log( "broadcast this to take your winnings:", txhex );
+                    txdata.vin[ 0 ].witness = [ sig, bobs_ack_2, bobs_ack_1, alices_move_preimage, script, cblock ];
+                    var txhex = tapscript.Tx.encode( txdata ).hex;
+                    console.log( "or this:", txhex );
+                }
+            }
             var init = async () => {
                 //alice's first turn
                 var alices_first_turn_address = alicesTurn( 0 );
@@ -1458,6 +1815,7 @@
                 //alice takes her first turn
 
                 await takeAlicesTurn( 0, 0, bobs_first_turn_address );
+                if ( victory_achieved ) return;
 
                 //bob waits for alice's info
 
@@ -1487,6 +1845,7 @@
                 //alice takes her second turn
 
                 await takeAlicesTurn( 2, 1, bobs_second_turn_address, bobs_preimage, bobs_move );
+                if ( victory_achieved ) return;
 
                 //bob waits for alice's info
 
@@ -1517,6 +1876,7 @@
                 //alice takes her third turn
 
                 await takeAlicesTurn( 4, 2, bobs_third_turn_address, bobs_preimage, bobs_move );
+                if ( victory_achieved ) return;
 
                 //bob waits for alice's info
 
@@ -1547,6 +1907,7 @@
                 //alice takes her fourth turn
 
                 await takeAlicesTurn( 6, 3, bobs_fourth_turn_address, bobs_preimage, bobs_move );
+                if ( victory_achieved ) return;
 
                 //bob waits for alice's info
 
@@ -1577,6 +1938,7 @@
                 //alice takes her last turn
 
                 await takeAlicesTurn( 8, 4, "tb1qd28npep0s8frcm3y7dxqajkcy2m40eysplyr9v", bobs_preimage, bobs_move );
+                if ( victory_achieved ) return;
 
                 Object.keys( sessionStorage ).forEach( item => { if ( sessionStorage[ item ].includes( "___|" ) ) sessionStorage[ item ] = "_X_|";if ( sessionStorage[ item ].includes( "___" ) ) sessionStorage[ item ] = "_X_"; });
                 var cell_0 = sessionStorage[ "cell_0" ];
