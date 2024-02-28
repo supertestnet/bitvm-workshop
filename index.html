@@ -702,9 +702,9 @@
                     }
                 });
                 combinations.forEach( ( item, index ) => {
-                    combinations[ index ][ 0 ] = bob[ "accept_hashes" ][ item[ 0 ] ];
-                    combinations[ index ][ 1 ] = bob[ "accept_hashes" ][ item[ 1 ] ];
-                    combinations[ index ][ 2 ] = alice[ "hashes" ][ item[ 2 ] ];
+                    combinations[ index ][ 0 ] = opponent[ "accept_hashes" ][ item[ 0 ] ];
+                    combinations[ index ][ 1 ] = opponent[ "accept_hashes" ][ item[ 1 ] ];
+                    combinations[ index ][ 2 ] = self[ "hashes" ][ item[ 2 ] ];
                 });
                 var possibles = [];
                 combinations.forEach( item => {
@@ -735,7 +735,7 @@
                     //todo: ensure this is a multisig path that
                     //sends the money to an address where Bob
                     //has an opportunity to prove alice cheated
-                    alice[ "pubkey" ],
+                    self[ "pubkey" ],
                     "OP_CHECKSIG"
                 ];
                 var target = tapscript.Tap.encodeScript( script );
@@ -772,7 +772,9 @@
             $$( '.square' ).forEach( item => {
                 item.onclick = () => {
                     if ( !game_on ) return;
-                    if ( item.innerHTML ) return;
+                    var conf = true;
+                    if ( item.innerHTML ) conf = confirm( `This is an illegal move! Your opponent will be able to take your money. Click ok to do it anyway` );
+                    if ( !conf ) return;
                     var symbol = `<span style="font-size: 200%;">&times;</span>`
                     if ( !type ) symbol = `&#9711`;
                     item.innerHTML = symbol;
@@ -1289,6 +1291,117 @@
                     ]);
                 });
 
+                var combinations = [];
+                var i; for ( i=0; i<9; i++ ) {
+                    //row 1
+                    if ( i == 0 ) var hashes = [0, 9, 18, 27, 1, 10, 19, 28];
+                    if ( i == 1 ) var hashes = [0, 9, 18, 27, 2, 11, 20, 29];
+                    if ( i == 2 ) var hashes = [1, 10, 19, 28, 2, 11, 20, 29];
+                    //row 2
+                    if ( i == 3 ) var hashes = [3, 12, 21, 30, 4, 13, 22, 31];
+                    if ( i == 4 ) var hashes = [3, 12, 21, 30, 5, 14, 23, 32];
+                    if ( i == 5 ) var hashes = [4, 13, 22, 31, 5, 14, 23, 32];
+                    //row 3
+                    if ( i == 6 ) var hashes = [6, 15, 24, 33, 7, 16, 25, 34];
+                    if ( i == 7 ) var hashes = [6, 15, 24, 33, 8, 17, 26, 35];
+                    if ( i == 8 ) var hashes = [7, 16, 25, 34, 8, 17, 26, 35];
+                    for ( var comb of G.combination( hashes, 2 ) ) {var comb2 = JSON.parse( JSON.stringify( comb ) ); comb2.sort((a,b)=>a-b).reverse(); if ( ( comb2[ 0 ] - comb2[ 1 ] ) % 9 && comb2[ 0 ] - comb2[ 1 ] >= 3 ) combinations.push( Array.from( comb ) );}
+                }
+                combinations.forEach( ( item, index ) => {
+                    combinations.splice( index * 4, 1, ...JSON.parse( JSON.stringify( [combinations[ index * 4 ]].flatMap(i => Array(4).fill(i))) ) );
+                });
+                combinations.forEach( ( item, index ) => {
+                    if ( item.length > 2 ) return;
+                    //row 1
+                    //Alice had 180 here because there were originally 108 combinations and I multiplied them by 5 for each of her 5 turns. Then I divided the result, 540, by 3 to work on rows 1, 2, and 3. But Bob only has 4 turns so he only gets 108*4 = 432 combinations, meaning 180 for him should be 432/3 = 144
+                    if ( index < 144 ) {
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 1 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 1 ) {
+                            if ( index % 4 == 0 ) item.push( 2 );
+                            if ( index % 4 == 1 ) item.push( 11 );
+                            if ( index % 4 == 2 ) item.push( 20 );
+                            if ( index % 4 == 3 ) item.push( 29 );
+                        }
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 4 == 0 ) item.push( 1 );
+                            if ( index % 4 == 1 ) item.push( 10 );
+                            if ( index % 4 == 2 ) item.push( 19 );
+                            if ( index % 4 == 3 ) item.push( 28 );
+                        }
+                        if ( item[ 0 ] % 3 == 1 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 1 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 4 == 0 ) item.push( 0 );
+                            if ( index % 4 == 1 ) item.push( 9 );
+                            if ( index % 4 == 2 ) item.push( 18 );
+                            if ( index % 4 == 3 ) item.push( 27 );
+                        }
+                    }
+                    //row 2
+                    if ( index >= 144 && index < 288 ) {
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 1 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 1 ) {
+                            if ( index % 4 == 0 ) item.push( 5 );
+                            if ( index % 4 == 1 ) item.push( 14 );
+                            if ( index % 4 == 2 ) item.push( 23 );
+                            if ( index % 4 == 3 ) item.push( 32 );
+                        }
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 4 == 0 ) item.push( 4 );
+                            if ( index % 4 == 1 ) item.push( 13 );
+                            if ( index % 4 == 2 ) item.push( 22 );
+                            if ( index % 4 == 3 ) item.push( 31 );
+                        }
+                        if ( item[ 0 ] % 3 == 1 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 1 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 4 == 0 ) item.push( 3 );
+                            if ( index % 4 == 1 ) item.push( 12 );
+                            if ( index % 4 == 2 ) item.push( 21 );
+                            if ( index % 4 == 3 ) item.push( 30 );
+                        }
+                    }
+                    //row 3
+                    if ( index >= 288 && index < 432 ) {
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 1 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 1 ) {
+                            if ( index % 4 == 0 ) item.push( 8 );
+                            if ( index % 4 == 1 ) item.push( 17 );
+                            if ( index % 4 == 2 ) item.push( 26 );
+                            if ( index % 4 == 3 ) item.push( 35 );
+                        }
+                        if ( item[ 0 ] % 3 == 0 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 0 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 4 == 0 ) item.push( 7 );
+                            if ( index % 4 == 1 ) item.push( 16 );
+                            if ( index % 4 == 2 ) item.push( 25 );
+                            if ( index % 4 == 3 ) item.push( 34 );
+                        }
+                        if ( item[ 0 ] % 3 == 1 && item[ 1 ] % 3 == 2 || item[ 1 ] % 3 == 1 && item[ 0 ] % 3 == 2 ) {
+                            if ( index % 4 == 0 ) item.push( 6 );
+                            if ( index % 4 == 1 ) item.push( 15 );
+                            if ( index % 4 == 2 ) item.push( 24 );
+                            if ( index % 4 == 3 ) item.push( 33 );
+                        }
+                    }
+                });
+                combinations.forEach( combination => {
+                    bobs_turn_scripts.push([
+                        "OP_RIPEMD160",
+                        "OP_SWAP",
+                        "OP_RIPEMD160",
+                        2,
+                        "OP_ROLL",
+                        "OP_RIPEMD160",
+                        "OP_SWAP",
+                        2,
+                        "OP_ROLL",
+                        bob[ "hashes" ][ combination[ 2 ] ],
+                        "OP_EQUALVERIFY",
+                        alice[ "accept_hashes" ][ combination[ 1 ] ],
+                        "OP_EQUALVERIFY",
+                        alice[ "accept_hashes" ][ combination[ 0 ] ],
+                        "OP_EQUALVERIFY",
+                        //todo: ensure this is a multisig path that
+                        //sends the money to an address where Bob
+                        //has an opportunity to prove alice cheated
+                        bob[ "pubkey" ],
+                        "OP_CHECKSIG"
+                    ]);
+                });
+
                 bob[ "trees" ].push( bobs_turn_scripts.map( s => tapscript.Tap.encodeScript( s ) ) );
                 var pubkey = "ab".repeat( 32 );
                 var [ tpubkey ] = tapscript.Tap.getPubKey( pubkey, { tree: bob[ "trees" ][ original_turn ] });
@@ -1617,6 +1730,8 @@
                 game_on = undefined;
                 move = Number( move ) - 1;
                 var move_preimage = bob[ "preimages" ][ Number( move ) + Number( turn * 9 ) ];
+                bobChecksVictory( step, turn, move_preimage );
+                if ( victory_achieved ) return alert( `You won! Check your console to collect your winnings!` );
                 var accept_preimage = bob[ "accept_preimages" ][ alices_move + Number( turn * 9 ) ];
                 var target = tapscript.Tap.encodeScript( bob[ "scripts" ][ turn ][ alices_move + 2 ] );
                 var pubkey = "ab".repeat( 32 );
@@ -1759,6 +1874,50 @@
                     console.log( "or this:", txhex );
                 }
             }
+            var bobChecksVictory = ( step, turn, bobs_move_preimage ) => {
+                var victory;
+                //check rows
+                var i; for ( i=0; i<3; i++ ) {
+                    if ( i==0 ) var row_nums = [0,1,2];
+                    if ( i==1 ) var row_nums = [3,4,5];
+                    if ( i==2 ) var row_nums = [6,7,8];
+                    for ( var comb of G.combination( row_nums, 2 ) ) {
+                        if ( victory ) continue;
+                        var squares = Array.from( comb );
+                        var alices_ack_1 = bob[ "alices_acks" ][ squares[ 0 ] ];
+                        var alices_ack_2 = bob[ "alices_acks" ][ squares[ 1 ] ];
+                        if ( !alices_ack_1 || !alices_ack_2 ) continue;
+                        victory = proveVictory( alices_ack_1, alices_ack_2, bobs_move_preimage, alice, bob );
+                    }
+                }
+                if ( victory ) {
+                    var txdata = tapscript.Tx.create({
+                        vin: [{
+                            txid: contract[ step ][ "txid" ],
+                            vout: contract[ step ][ "vout" ],
+                            prevout: {
+                                value: contract[ step ][ "amt" ],
+                                scriptPubKey: tapscript.Address.toScriptPubKey( contract[ step ][ "funding_address" ] )
+                            },
+                        }],
+                        vout: [{
+                            value: contract[ step ][ "amt" ] - 500,
+                            scriptPubKey: tapscript.Address.toScriptPubKey( "tb1qd28npep0s8frcm3y7dxqajkcy2m40eysplyr9v" )
+                        }]
+                    });
+                    var target = victory[ 0 ];
+                    var script = victory[ 1 ];
+                    var sig = tapscript.Signer.taproot.sign( bob[ "privkey" ], txdata, 0, { extension: target });
+                    var pubkey = "ab".repeat( 32 );
+                    var [ tpubkey, cblock ] = tapscript.Tap.getPubKey( pubkey, { tree: bob[ "trees" ][ turn ], target });
+                    txdata.vin[ 0 ].witness = [ sig, alices_ack_1, alices_ack_2, bobs_move_preimage, script, cblock ];
+                    var txhex = tapscript.Tx.encode( txdata ).hex;
+                    console.log( "broadcast this to take your winnings:", txhex );
+                    txdata.vin[ 0 ].witness = [ sig, alices_ack_2, alices_ack_1, bobs_move_preimage, script, cblock ];
+                    var txhex = tapscript.Tx.encode( txdata ).hex;
+                    console.log( "or this:", txhex );
+                }
+            }
             var init = async () => {
                 //alice's first turn
                 var alices_first_turn_address = alicesTurn( 0 );
@@ -1830,6 +1989,7 @@
                 //bob takes his first turn
 
                 await takeBobsTurn( 1, 0, alices_second_turn_address, alices_preimage, alices_move );
+                if ( victory_achieved ) return;
 
                 //alice waits for bob's info
 
@@ -1861,6 +2021,7 @@
                 //bob takes his second turn
 
                 await takeBobsTurn( 3, 1, alices_third_turn_address, alices_preimage, alices_move );
+                if ( victory_achieved ) return;
 
                 //alice waits for bob's info
 
@@ -1892,6 +2053,7 @@
                 //bob takes his third turn
 
                 await takeBobsTurn( 5, 2, alices_fourth_turn_address, alices_preimage, alices_move );
+                if ( victory_achieved ) return;
 
                 //alice waits for bob's info
 
@@ -1923,6 +2085,7 @@
                 //bob takes his last turn
 
                 await takeBobsTurn( 7, 3, alices_fifth_turn_address, alices_preimage, alices_move );
+                if ( victory_achieved ) return;
 
                 //alice waits for bob's info
 
