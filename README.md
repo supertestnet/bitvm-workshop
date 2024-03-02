@@ -13,7 +13,11 @@ The code is a work in progress and doesn't fully work yet, do not expect much
 http://tinyurl.com/bitvm-workshop
 
 # How to use
-[Click this link](supertestnet.github.io/bitvm-workshop/), open your web browser's console (ctrl+shift+i in firefox, otherwise Menu > More Tools > Web Developer Tools > Console), click Play, and follow the promps. They are a bit confusing so consider watching [this tutorial video](https://www.youtube.com/watch?v=uurULEZr4PA) for assistance. And remember, this software is only half baked, so be prepared for disappointment
+- Open up [Mutiny Textnet Tx Broadcaster](https://mutinynet.com/tx/push)
+- And [Mutiny Testnet Faucet](https://faucet.mutinynet.com/)
+- [Open bit tac toe by clicking this link](supertestnet.github.io/bitvm-workshop/)
+- On the bit tac toe page, open your web browser's console (ctrl+shift+i in firefox, otherwise Menu > More Tools > Web Developer Tools > Console)
+- Click Play and follow the promps. They are a bit confusing so consider watching [this video](https://www.youtube.com/watch?v=uurULEZr4PA) to see how it's *supposed* to work. And remember, this software is only half baked, so be prepared for disappointment
 
 # Resources
 - whitepaper: https://bitvm.org/bitvm.pdf
