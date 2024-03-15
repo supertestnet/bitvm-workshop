@@ -15,7 +15,7 @@ http://tinyurl.com/bitvm-workshop
 # How to use
 - Open up [Mutiny Textnet Tx Broadcaster](https://mutinynet.com/tx/push)
 - And [Mutiny Testnet Faucet](https://faucet.mutinynet.com/)
-- [Open bit tac toe by clicking this link](supertestnet.github.io/bitvm-workshop/)
+- [Open bit tac toe by clicking this link](https://supertestnet.github.io/bitvm-workshop/)
 - On the bit tac toe page, open your web browser's console (ctrl+shift+i in firefox, otherwise Menu > More Tools > Web Developer Tools > Console)
 - Click Play and follow the promps. They are a bit confusing so consider watching [this video](https://www.youtube.com/watch?v=LwH9fhY4uGA) to see how it's *supposed* to work. And remember, this software is only half baked, so be prepared for disappointment
 
