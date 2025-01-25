@@ -9,6 +9,9 @@ Basic bitvm app that demonstrates 5 principles of bitvm:
 # Warning
 The code is a work in progress and doesn't fully work yet, do not expect much
 
+# Workshop video
+https://www.youtube.com/watch?v=LwH9fhY4uGA
+
 # Slideshow
 http://tinyurl.com/bitvm-workshop
 
